@@ -3,7 +3,8 @@
   "description": "A template (surprise!"),
   "author": "Densaugeo",
   "dependencies": {
-    "foo": "#.#.x",
+    "express": "3.4.x",
+    "ws": "0.4.x"
   },
   "engine": "node 0.10.x"
 }
