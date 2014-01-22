@@ -1,0 +1,9 @@
+{
+  "name": "Template",
+  "description": "A template (surprise!"),
+  "author": "Densaugeo",
+  "dependencies": {
+    "foo": "#.#.x",
+  },
+  "engine": "node 0.10.x"
+}
