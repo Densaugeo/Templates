@@ -34,6 +34,7 @@ var optionsDefault = {
   nofile: true
 };
 
+// Condense options sources into one options object, applying priority
 var options = {};
 
 for(var i in optionsDefault) {
