@@ -74,7 +74,7 @@ var httpServer = http.createServer(app);
 httpServer.listen(options.port, options.ip);
 
 // Simple static page server
-app.use('/http', express.static('./http'));
+app.use('/', express.static('./http'));
 app.use(express.compress());
 console.log(new Date().toUTCString() + ': Static file server listening at http://' + options.ip + ':' + options.port + '/http');
 
