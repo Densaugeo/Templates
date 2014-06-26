@@ -42,13 +42,23 @@ for(var i in optionsDefault) {
 }
 
 if(!iz(options.ip).ip().valid) {
-  console.error('Error: IP must be a valid IP address or local url');
-  process.exit(1);
+  if(iz(process.env[options.ip]).required().ip().valid) {
+    options.ip = process.env[options.ip];
+  }
+  else {
+    console.error('Error: IP must be a valid IP address or local url');
+    process.exit(1);
+  }
 }
 
 if(!iz(options.port).int().between(1, 65535).valid) {
-  console.error('Error: TCP port must be an integer between 1 and 65535');
-  process.exit(1);
+  if(iz(process.env[options.port]).required().int().between(1, 65535).valid) {
+    options.port = process.env[options.port];
+  }
+  else {
+    console.error('Error: TCP port must be an integer between 1 and 65535');
+    process.exit(1);
+  }
 }
 
 if(iz(options.port).int().between(1, 1024).valid) {
@@ -86,18 +96,20 @@ wsServer.on('connection', function(connection) {
 // CLI //
 /////////
 
-var cli = repl.start({});
-cli.context.http           = http;
-cli.context.repl           = repl;
-cli.context.fs             = fs;
-cli.context.express        = express;
-cli.context.ws             = ws;
-cli.context.stdio          = stdio;
-cli.context.iz             = iz;
-cli.context.optionsCLI     = optionsCLI;
-cli.context.optionsFile    = optionsFile;
-cli.context.optionsDefault = optionsDefault;
-cli.context.options        = options;
-cli.context.app            = app;
-cli.context.httpServer     = httpServer;
-cli.context.wsServer       = wsServer;
+if(repl != null) { // REPL may not be available on some cloud hosts
+  var cli = repl.start({});
+  cli.context.http           = http;
+  cli.context.repl           = repl;
+  cli.context.fs             = fs;
+  cli.context.express        = express;
+  cli.context.ws             = ws;
+  cli.context.stdio          = stdio;
+  cli.context.iz             = iz;
+  cli.context.optionsCLI     = optionsCLI;
+  cli.context.optionsFile    = optionsFile;
+  cli.context.optionsDefault = optionsDefault;
+  cli.context.options        = options;
+  cli.context.app            = app;
+  cli.context.httpServer     = httpServer;
+  cli.context.wsServer       = wsServer;
+}
