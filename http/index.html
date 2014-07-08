@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="en">
 <head>
-<meta charset='UTF-8'>
+<meta charset="utf-8">
 
 <title>Template</title>
 
@@ -21,6 +21,17 @@ if(top !== self) {
 </body>
 
 <script type="text/javascript">
+
+// WebSocket //
+
+var ws =  new WebSocket('ws://' + window.location.host);
+
+ws.onmessage = function(e) {
+  console.log('Received message: ' + e.data);
+  console.log(e);
+}
+
+// Startup scripts //
 
 eval(localStorage.onstart);
 
