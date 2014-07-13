@@ -72,6 +72,18 @@ window.addEventListener("resize", function()
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+var timeDelta = 0, timePrevious;
+
+function tick()
+{
+  // note: three.js includes requestAnimationFrame shim
+  requestAnimationFrame(tick);
+  
+  renderer.render(scene, camera);
+}
+
+tick();
+
 ///////////////
 // WebSocket //
 ///////////////
