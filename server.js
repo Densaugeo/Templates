@@ -46,7 +46,7 @@ if(!iz(options.ip).ip().valid) {
     options.ip = process.env[options.ip];
   }
   else {
-    console.error('Error: IP must be a valid IP address or local url');
+    console.error('Error: IP must be a valid IP address or local url. Run with -i 0.0.0.0 to use all available IPs');
     process.exit(1);
   }
 }
@@ -56,7 +56,7 @@ if(!iz(options.port).int().between(1, 65535).valid) {
     options.port = process.env[options.port];
   }
   else {
-    console.error('Error: TCP port must be an integer between 1 and 65535');
+    console.error('Error: TCP port must be an integer between 1 and 65535. Run with -p 8080 to listen on port 8080');
     process.exit(1);
   }
 }
