@@ -145,11 +145,14 @@ THREE.Matrix4.prototype.translateZ = function(z) {var a = this.elements; a[12] +
 
 THREE.Densaugeo.FreeControls = function(camera, domElement, options) {
   var self = this;
+  if(domElement == null) {
+    throw new TypeError('Error in THREE.Densaugeo.Freecontrols constructor: domElement must be supplied');
+  }
   
   this.panKeySpeed        = options && options.panKeySpeed        || 0.01 ;
   this.panMouseSpeed      = options && options.panMouseSpeed      || 0.1  ;
   this.rotationKeySpeed   = options && options.rotationKeySpeed   || 0.001;
-  this.rotationMouseSpeed = options && options.rotationMouseSpeed || 0.01 ;
+  this.rotationMouseSpeed = options && options.rotationMouseSpeed || 0.002;
   this.dollySpeed         = options && options.dollySpeed         || 1    ;
   
   camera.matrixAutoUpdate = false;
@@ -159,72 +162,124 @@ THREE.Densaugeo.FreeControls = function(camera, domElement, options) {
   var xPrevious = 0;
   var yPrevious = 0;
   
-  (domElement || document).addEventListener('keydown', function(event) {
+  document.addEventListener('keydown', function(event) {
     inputs[event.keyCode] = true;
   });
   
-  (domElement || document).addEventListener('keyup', function(event) {
+  document.addEventListener('keyup', function(event) {
     delete inputs[event.keyCode];
   });
   
   // FF doesn't support standard mousewheel event
-  (domElement || document).addEventListener('mousewheel', function(event) {
+  document.addEventListener('mousewheel', function(event) {
     camera.matrix.translateZ(-event.wheelDelta*self.dollySpeed/360);
   });
-  (domElement || document).addEventListener('DOMMouseScroll', function(event) {
+  document.addEventListener('DOMMouseScroll', function(event) {
     camera.matrix.translateZ(event.detail*self.dollySpeed/3);
   });
   
   // Context menu interferes with mouse control
-  (domElement || document).addEventListener('contextmenu', function(event) {
+  domElement.addEventListener('contextmenu', function(event) {
     event.preventDefault();
   });
   
-  (domElement || document).addEventListener('mousemove', function(event) {
-    var x = event.clientX - xPrevious;
-    var y = event.clientY - yPrevious;
-    
-    if(event.buttons & 1) {
-      camera.matrix.multiply(new THREE.Matrix4().makeRotationX(-y*self.rotationMouseSpeed));
-      
-      var position = THREE.Vector3.prototype.setFromMatrixPosition(camera.matrix);
-      camera.matrix.multiplyMatrices(new THREE.Matrix4().makeRotationZ(-x*self.rotationMouseSpeed), camera.matrix);
-      camera.matrix.setPosition(position);
+  // Only load mousemove handler while mouse is depressed
+  domElement.addEventListener('mousedown', function(event) {
+    if(event.which === 3) {
+      domElement.addEventListener('mousemove', panHandler);
     }
-    if(event.buttons & 2) {
-      camera.matrix.translateX(-x*self.panMouseSpeed);
-      camera.matrix.translateY( y*self.panMouseSpeed);
+    else {
+      var requestPointerLock = domElement.requestPointerLock || domElement.mozRequestPointerLock || domElement.webkitRequestPointerLock;
+      requestPointerLock.call(domElement);
     }
-    
-    xPrevious = event.clientX;
-    yPrevious = event.clientY;
   });
   
+  domElement.addEventListener('mouseup', function() {
+    domElement.removeEventListener('mousemove', panHandler);
+  });
+  
+  var pointerLockHandler = function(event) {
+    var pointerLockElement = document.pointerLockElement || document.mozPointerLockElement || document.webkitPointerLockElement;
+    
+    if(pointerLockElement === domElement) {
+      document.addEventListener('mousemove', rotHandler);
+    }
+    else {
+      document.removeEventListener('mousemove', rotHandler);
+    }
+  }
+  
+  document.addEventListener('pointerlockchange'      , pointerLockHandler);
+  document.addEventListener('mozpointerlockchange'   , pointerLockHandler);
+  document.addEventListener('webkitpointerlockchange', pointerLockHandler);
+  
+  var panHandler = function(event) {
+    var x = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+    var y = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+    
+    camera.matrix.translateX(-x*self.panMouseSpeed);
+    camera.matrix.translateY( y*self.panMouseSpeed);
+  }
+  
+  var rotHandler = function(event) {
+    document.title = event.movementX;
+    var x = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+    var y = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+    
+    camera.matrix.multiply(new THREE.Matrix4().makeRotationX(-y*self.rotationMouseSpeed));
+    
+    var position = THREE.Vector3.prototype.setFromMatrixPosition(camera.matrix);
+    camera.matrix.multiplyMatrices(new THREE.Matrix4().makeRotationZ(-x*self.rotationMouseSpeed), camera.matrix);
+    camera.matrix.setPosition(position);
+  }
+  
+  var touchX = 0;
+  var touchY = 0;
+  
+  // Touchmove events do not work when directly added, they have to be added by a touchstart listener
+  // I think this has to do with the default touch action being scrolling
+  domElement.addEventListener('touchstart', function(event) {
+    touchX = event.touches[0].clientX;
+    touchY = event.touches[0].clientY;
+    
+    domElement.addEventListener('touchmove', touchHandler);
+  });
+  
+  domElement.addEventListener('touchend', function() {
+    domElement.removeEventListener('touchmove', touchHandler);
+  });
+  
+  var touchHandler = function(event) {
+    event.preventDefault();
+    
+    var movement = {movementX: event.touches[0].clientX - touchX, movementY: event.touches[0].clientY - touchY};
+    
+    if(event.touches.length === 1) {
+      rotHandler(movement);
+    }
+    else {
+      panHandler(movement);
+    }
+    
+    touchX = event.touches[0].clientX;
+    touchY = event.touches[0].clientY;
+  }
+  
   var keydownHandlers = {
-    81: function(time) {camera.matrix.translateX(-time*self.panKeySpeed)}, // Q - Strafe camera left
-    69: function(time) {camera.matrix.translateX( time*self.panKeySpeed)}, // E - Strafe camera right
+    65: function(time) {camera.matrix.translateX(-time*self.panKeySpeed)}, // A - Strafe camera left
+    68: function(time) {camera.matrix.translateX( time*self.panKeySpeed)}, // D - Strafe camera right
     87: function(time) {camera.matrix.translateZ(-time*self.panKeySpeed)}, // W - Move camera forward
     83: function(time) {camera.matrix.translateZ( time*self.panKeySpeed)}, // S - Move camera backward
-    90: function(time) {camera.matrix.elements[14] += time*self.panKeySpeed}, // Z - Strafe camera down (in global coords)
-    67: function(time) {camera.matrix.elements[14] -= time*self.panKeySpeed}, // C - Strafe camera up (in global coords)
+    69: function(time) {camera.matrix.elements[14] += time*self.panKeySpeed}, // E - Strafe camera up (in global coords)
+    67: function(time) {camera.matrix.elements[14] -= time*self.panKeySpeed}, // C - Strafe camera down (in global coords)
     
     38: function(time) {camera.matrix.multiply(new THREE.Matrix4().makeRotationX( self.rotationKeySpeed*time))}, // Up arrow - Turn camera up
     40: function(time) {camera.matrix.multiply(new THREE.Matrix4().makeRotationX(-self.rotationKeySpeed*time))}, // Down arrow - Turn camera down
-    65: function(time) {
-      var position = THREE.Vector3.prototype.setFromMatrixPosition(camera.matrix);
-      camera.matrix.multiplyMatrices(new THREE.Matrix4().makeRotationZ( self.rotationKeySpeed*time), camera.matrix);
-      camera.matrix.setPosition(position);
-    }, // A - Turn camera left
     37: function(time) {
       var position = THREE.Vector3.prototype.setFromMatrixPosition(camera.matrix);
       camera.matrix.multiplyMatrices(new THREE.Matrix4().makeRotationZ( self.rotationKeySpeed*time), camera.matrix);
       camera.matrix.setPosition(position);
     }, // Left arrow - Turn camera left
-    68: function(time) {
-      var position = THREE.Vector3.prototype.setFromMatrixPosition(camera.matrix);
-      camera.matrix.multiplyMatrices(new THREE.Matrix4().makeRotationZ(-self.rotationKeySpeed*time), camera.matrix);
-      camera.matrix.setPosition(position);
-    }, // D - Trun camera right
     39: function(time) {
       var position = THREE.Vector3.prototype.setFromMatrixPosition(camera.matrix);
       camera.matrix.multiplyMatrices(new THREE.Matrix4().makeRotationZ(-self.rotationKeySpeed*time), camera.matrix);
@@ -249,30 +304,3 @@ THREE.Densaugeo.FreeControls = function(camera, domElement, options) {
   }
   camLoop();
 }
-
-
-
-// For resetting + commenting key bindings:
-
-/*
- * var freeCamSpeed = 0.01;
- * var freeCamRotation = 0.001;
- * 
- * keyDownListeners[38] = function() {camera.matrix.multiply(new THREE.Matrix4().makeRotationX( freeCamRotation*time))} // Up arrow - Turn camera up
- * keyDownListeners[40] = function() {camera.matrix.multiply(new THREE.Matrix4().makeRotationX(-freeCamRotation*time))} // Down arrow - Turn camera down
- * keyDownListeners[37] = function()
- * {
- *  var position = THREE.Vector3.prototype.setFromMatrixPosition(camera.matrix);
- *  
- *  camera.matrix.multiplyMatrices(new THREE.Matrix4().makeRotationZ(freeCamRotation*time), camera.matrix);
- *  
- *  camera.matrix.setPosition(position);
- * }
- * keyDownListeners[39] = function()
- * {
- *  var position = THREE.Vector3.prototype.setFromMatrixPosition(camera.matrix);
- *  
- *  camera.matrix.multiplyMatrices(new THREE.Matrix4().makeRotationZ(-freeCamRotation*time), camera.matrix);
- *  
- *  camera.matrix.setPosition(position);
- * }*/
