@@ -44,8 +44,6 @@ var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHei
 camera.matrix.compose(new THREE.Vector3(0, 0, 10), new THREE.Quaternion(0, 0, -1, 0), new THREE.Vector3(1, 1, 1));
 scene.add(camera);
 
-var controls = new THREE.Densaugeo.FreeControls(camera);
-
 var ambientLight = new THREE.AmbientLight(0x3F3F3F);
 scene.add(ambientLight);
 
@@ -62,6 +60,8 @@ renderer.setClearColor(0xC0C0C0, 1);
 
 document.body.appendChild(renderer.domElement);
 renderer.domElement.className += " canvas";
+
+var controls = new THREE.Densaugeo.FreeControls(camera, renderer.domElement);
 
 // WebGL occupies entire browser window
 window.addEventListener("resize", function()
