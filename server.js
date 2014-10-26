@@ -16,6 +16,7 @@ var optionsAllowed = {
   'ip'    : {key: 'i', args: 1, description: 'IP address for both HTTP and WS servers. Defaults to OpenShift if available, or if not then 0.0.0.0'},
   'port'  : {key: 'p', args: 1, description: 'TCP port for both HTTP and WS servers. Defaults to OpenShift if available, or if not then 8080'},
   'config': {key: 'c', args: 1, description: 'Load settings from configurations file. Defaults to ./config.json'},
+  'silent': {key: 's', args: 0, description: 'Silence stdout'},
   'nofile': {          args: 0, description: 'Run without a config file. "ip" and "port" options must be specified'}
 };
 
@@ -63,6 +64,8 @@ if(iz(options.port).int().between(1, 1024).valid) {
   console.warn('Warning: TCP ports between 1 and 1024 may require root permission');
 }
 
+var log = options.silent ? function(){} : function(message){console.log(new Date().toUTCString() + ': ' + message)};
+
 /////////////////
 // HTTP server //
 /////////////////
@@ -74,7 +77,7 @@ httpServer.listen(options.port, options.ip);
 // Simple static page server
 app.use('/', express.static('./http'));
 app.use(express.compress());
-console.log(new Date().toUTCString() + ': Static file server listening at http://' + options.ip + ':' + options.port + '/');
+log('Static file server listening at http://' + options.ip + ':' + options.port + '/');
 
 ///////////////
 // WS server //
@@ -83,14 +86,14 @@ console.log(new Date().toUTCString() + ': Static file server listening at http:/
 var wsServer = new ws.Server({server: httpServer, path: '/'});
 
 wsServer.on('connection', function(connection) {
-  console.log(new Date().toUTCString() + ': Received WebSocket');
+  log('Received WebSocket');
   
   connection.on('message', function(message) {
-    console.log(new Date().toUTCString() + ': Received message: ' + message);
+    log('Received message: ' + message);
   });
   
   connection.on('close', function() {
-    console.log(new Date().toUTCString() + ': Closed WebSocket');
+    log('Closed WebSocket');
   });
 });
 
@@ -98,7 +101,7 @@ wsServer.on('connection', function(connection) {
 // CLI //
 /////////
 
-if(repl != null) { // REPL may not be available on some cloud hosts
+if(!options.silent) {
   var cli = repl.start({});
   cli.context.http           = http;
   cli.context.repl           = repl;
