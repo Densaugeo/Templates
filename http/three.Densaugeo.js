@@ -470,7 +470,7 @@ with({p: THREE.Densaugeo.FreeControls.prototype}) {
   p.rotationAccelSpeed = 1;
   p.dollySpeed = 1;
   p.touchThrottleSpeed = 0.0005;
-  p.joystickPanSpeed = 0.1;
+  p.joystickPanSpeed = 0.05;
   p.joystickRotSpeed = 0.003;
   p.joystickThrottleSpeed = 0.05;
   p.keyTurnLeft = 37; // Left arrow
