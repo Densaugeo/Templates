@@ -385,11 +385,19 @@ THREE.Densaugeo.FreeControls = function(camera, domElement, options) {
     }
   }
   
+  var rotationRateConversion = 0.000017453292519943296;
+  
+  // Browser detection shim for Chome, since they use different units for DeviceRotationRate without
+  // providing any documentation or other way of detecting what units are being used
+  if(window.chrome) {
+    rotationRateConversion = 0.001;
+  }
+  
   var accelHandler = function(e) {
     if(accelActive) {
       // Constant = Math.PI/180/1000
-      rotationRateAlpha = e.rotationRate.alpha*0.000017453292519943296*self.rotationAccelSpeed;
-      rotationRateBeta  = e.rotationRate.beta *0.000017453292519943296*self.rotationAccelSpeed;
+      rotationRateAlpha = e.rotationRate.alpha*rotationRateConversion*self.rotationAccelSpeed;
+      rotationRateBeta  = e.rotationRate.beta *rotationRateConversion*self.rotationAccelSpeed;
     }
   }
   
