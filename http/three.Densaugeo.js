@@ -484,3 +484,398 @@ with({p: THREE.Densaugeo.FreeControls.prototype}) {
   p.keyForward = 87; // W
   p.keyBackward = 83; // S
 }
+
+THREE.Vector3.prototype.fromColor = function(/*THREE.Color*/ a) {
+  this.x = a.r;
+  this.y = a.g;
+  this.z = a.b;
+  
+  return this;
+}
+
+/**
+ * A collection of shaders:
+ * 
+ * WaterMaterial      - Basic water material, includes transparency, phong shading, and wave-like surafce distortion
+ * CoordinateMaterial - Shader for showing a coordinate grid
+ * PositionMaterial   - Sets colors based on position
+ * NormalMaterial     - Sets colors based on normal vector
+ * PsychMaterial      - Psychedelic shader
+ * 
+ * To create a material:
+ * var yourMaterial = new THREE.Densaugeo.WaterMaterial(options);
+ * 
+ * Surface distortion on the WaterMaterial and motion on the PsychMaterial require adding this line to your render loop:
+ * yourMaterial.tick(seconds_since_last_loop);
+ * 
+ * All THREE.ShaderMaterial options are supported
+ * 
+ * Additional options:
+ * Material                  Type          Name            Description
+ * -------------------------------------------------------------------
+ * All                       Number         alpha        - Opacity
+ * 
+ * All except WaterMaterial  Number         local        - If zero, use global coordinates. Else use local coordinates
+ * 
+ * WaterMaterial             THREE.Vector3  sunDirection - Direction of light for specular lighting
+ *                           THREE.Color    ambient      - Phong ambient color
+ *                           THREE.Color    diffuse      - Phong diffuse color
+ *                           THREE.Color    specular     - Phong specular color
+ * 
+ * CoordinateMaterial        THREE.Vector3  showAxes     - Basically three 'boolean' numbers
+ *                           THREE.Vector3  axisWeight   - Color fade distance from center of each axis to zero
+ *                           THREE.Vector3  showGrid     - Basically three 'boolean' numbers
+ *                           THREE.Vector3  gridWeight   - Color fade distance from center of each gridline to zero
+ *                           THREE.Vector3  gridSpacing  - Spacing for each grid dimension
+ * 
+ * PositionMaterial          THREE.Vector3  fadeDistance - Distance along an axis to fade its associated color from one to zero
+ * 
+ * NormalMaterial            Number         mode         - Changes how olors are calculated, not sure how to describe
+ * 
+ * PsychMaterial             THREE.Vector3  wavelength   - Distance along each axes between its associated color peaks
+ *                           THREE.Vector3  frequency    - Frequency of color peaks as they travel along each axis
+ * 
+ * If you change any of the additional options after instantiation, changes will take effect after calling .updateUniforms()
+ */
+THREE.Densaugeo.WaterMaterial = function(/*Object*/ options) {
+  THREE.ShaderMaterial.call(this);
+  
+  this.type = 'WaterMaterial';
+  
+  this.vertexShader   = THREE.ShaderLib.densWater.vertexShader;
+  this.fragmentShader = THREE.ShaderLib.densWater.fragmentShader;
+  this.transparent = true;
+  this.alpha = 0.8
+  this.sunDirection = new THREE.Vector3(4, 4, 10);
+  this.ambient  = new THREE.Color(0x050A14);
+  this.diffuse  = new THREE.Color(0x193366);
+  this.specular = new THREE.Color(0x193366);
+  
+  this.uniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.densWater.uniforms);
+  this.uniforms.normalSampler.value = THREE.ImageUtils.loadTexture('waternormals.jpg');
+  this.uniforms.normalSampler.value.wrapS = this.uniforms.normalSampler.value.wrapT = THREE.RepeatWrapping;
+  
+  this.setValues(options);
+  this.updateUniforms();
+}
+THREE.Densaugeo.WaterMaterial.prototype = Object.create(THREE.ShaderMaterial.prototype);
+THREE.Densaugeo.WaterMaterial.prototype.constructor = THREE.Densaugeo.WaterMaterial;
+
+THREE.Densaugeo.WaterMaterial.prototype.updateUniforms = function(values) {
+  this.uniforms.alpha.value = this.alpha;
+  this.uniforms.sunDirection.value.copy(this.sunDirection).normalize();
+  this.uniforms.ambient.value.fromColor(this.ambient);
+  this.uniforms.diffuse.value.fromColor(this.diffuse);
+  this.uniforms.specular.value.fromColor(this.specular);
+}
+
+THREE.Densaugeo.WaterMaterial.prototype.tick = function(seconds) {
+  this.uniforms.time.value += seconds;
+}
+
+THREE.ShaderLib.densWater = {
+  uniforms: {
+    normalSampler: {type: 't', value: null},
+    time         : {type: 'f', value: 0},
+    alpha        : {type: 'f', value: 0},
+    sunDirection: {type: 'v3', value: new THREE.Vector3()},
+    ambient     : {type: 'v3', value: new THREE.Vector3()},
+    diffuse     : {type: 'v3', value: new THREE.Vector3()},
+    specular    : {type: 'v3', value: new THREE.Vector3()},
+  },
+  
+  vertexShader: [
+   'varying vec3 worldPosition;',
+    
+   'void main() {',
+     'worldPosition = vec3(modelMatrix*vec4(position,1.0));',
+      
+     'gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);',
+   '}'
+  ].join('\n'),
+  
+  fragmentShader: [
+   'uniform sampler2D normalSampler;',
+   'uniform float time;',
+   'uniform float alpha;',
+   'uniform vec3 sunDirection;',
+   'uniform vec3 ambient;',
+   'uniform vec3 diffuse;',
+   'uniform vec3 specular;',
+    
+   'varying vec3 worldPosition;',
+    
+   'vec4 getNoise(vec2 uv) {',
+     'vec2 uv0 = (uv/51.5)+vec2(time/17.0, time/29.0);',
+     'vec2 uv1 = uv/53.5-vec2(time/-19.0, time/31.0);',
+     'vec2 uv2 = uv/vec2(448.5, 491.5)+vec2(time/101.0, time/97.0);',
+     'vec2 uv3 = uv/vec2(495.5, 438.5)-vec2(time/109.0, time/-113.0);',
+     'vec4 noise = (texture2D(normalSampler, uv0)) +',
+     '(texture2D(normalSampler, uv1)) +',
+     '(texture2D(normalSampler, uv2)) +',
+     '(texture2D(normalSampler, uv3));',
+     'return noise*0.5-1.0;',
+   '}',
+    
+   'void main() {',
+     'vec4 noise = getNoise(worldPosition.xy);',
+     'vec3 surfaceNormal = normalize(noise.xyz*vec3(1.0, 1.0, 2.0));',
+      
+     'float diffuseMag = max(dot(sunDirection, surfaceNormal),0.0);',
+      
+     'vec3 eyeDirection = normalize(cameraPosition - worldPosition);',
+     'vec3 reflection = normalize(reflect(-sunDirection, surfaceNormal));',
+     'float direction = max(0.0, dot(eyeDirection, reflection));',
+     'float specularMag = pow(direction, 100.0)*4.0;',
+      
+     'gl_FragColor = vec4(ambient + diffuse*diffuseMag + specular*specularMag, alpha);',
+   '}'
+  ].join('\n'),
+}
+
+THREE.Densaugeo.CoordinateMaterial = function(/*Object*/ options) {
+  THREE.ShaderMaterial.call(this);
+  
+  this.type = 'CoordinateMaterial';
+  
+  this.vertexShader   = THREE.ShaderLib.densCoordinate.vertexShader;
+  this.fragmentShader = THREE.ShaderLib.densCoordinate.fragmentShader;
+  this.local = 0;
+  this.alpha = 1;
+  this.showAxes    = new THREE.Vector3( 1  ,  1  ,  1  );
+  this.axisWeight  = new THREE.Vector3( 2  ,  2  ,  2  );
+  this.showGrid    = new THREE.Vector3( 1  ,  1  ,  1  );
+  this.gridWeight  = new THREE.Vector3( 0.5,  0.5,  0.5);
+  this.gridSpacing = new THREE.Vector3(16  , 16  , 16  );
+  this.uniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.densCoordinate.uniforms);
+  
+  this.setValues(options);
+  this.updateUniforms();
+}
+THREE.Densaugeo.CoordinateMaterial.prototype = Object.create(THREE.ShaderMaterial.prototype);
+THREE.Densaugeo.CoordinateMaterial.prototype.constructor = THREE.Densaugeo.CoordinateMaterial;
+
+THREE.Densaugeo.CoordinateMaterial.prototype.updateUniforms = function(values) {
+  this.uniforms.local.value = this.local;
+  this.uniforms.alpha.value = this.alpha;
+  this.uniforms.showAxes   .value.copy(this.showAxes   );
+  this.uniforms.axisWeight .value.copy(this.axisWeight );
+  this.uniforms.showGrid   .value.copy(this.showGrid   );
+  this.uniforms.gridWeight .value.copy(this.gridWeight );
+  this.uniforms.gridSpacing.value.copy(this.gridSpacing);
+}
+
+THREE.ShaderLib.densCoordinate = {
+  uniforms: {
+    local: {type: 'i', value: 0},
+    alpha: {type: 'f', value: 0},
+    showAxes   : {type: 'v3', value: new THREE.Vector3()},
+    axisWeight : {type: 'v3', value: new THREE.Vector3()},
+    showGrid   : {type: 'v3', value: new THREE.Vector3()},
+    gridWeight : {type: 'v3', value: new THREE.Vector3()},
+    gridSpacing: {type: 'v3', value: new THREE.Vector3()},
+  },
+  
+  vertexShader: [
+   'uniform int local;',
+    
+   'varying vec3 vPosition;',
+    
+   'void main() {',
+     'if(local != 0) {',
+       'vPosition = position;',
+     '}',
+     'else {',
+       'vPosition = vec3(modelMatrix*vec4(position,1.0));',
+     '}',
+      
+     'gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);',
+   '}'
+  ].join('\n'),
+  
+  fragmentShader: [
+   'uniform float alpha;',
+   'uniform vec3 showAxes;',
+   'uniform vec3 axisWeight;',
+   'uniform vec3 showGrid;',
+   'uniform vec3 gridWeight;',
+   'uniform vec3 gridSpacing;',
+    
+   'varying vec3 vPosition;',
+    
+   'void main() {',
+     'vec3 result = vec3(0.0);',
+      
+     'result = showGrid - min(mod(vPosition, gridSpacing), gridSpacing - mod(vPosition, gridSpacing))/gridWeight;',
+      
+     'result = max(result, showAxes - abs(vPosition)/axisWeight);',
+      
+     'gl_FragColor = vec4(result, alpha);',
+   '}'
+  ].join('\n'),
+}
+
+THREE.Densaugeo.PositionMaterial = function(/*Object*/ options) {
+  THREE.ShaderMaterial.call(this);
+  
+  this.type = 'PositionMaterial';
+  
+  this.vertexShader   = THREE.ShaderLib.densPosition.vertexShader;
+  this.fragmentShader = THREE.ShaderLib.densPosition.fragmentShader;
+  this.local = 0;
+  this.alpha = 1;
+  this.fadeDistance = new THREE.Vector3(64, 64, 64);
+  this.uniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.densPosition.uniforms);
+  
+  this.setValues(options);
+  this.updateUniforms();
+}
+THREE.Densaugeo.PositionMaterial.prototype = Object.create(THREE.ShaderMaterial.prototype);
+THREE.Densaugeo.PositionMaterial.prototype.constructor = THREE.Densaugeo.PositionMaterial;
+
+THREE.Densaugeo.PositionMaterial.prototype.updateUniforms = function(values) {
+  this.uniforms.local.value = this.local;
+  this.uniforms.alpha.value = this.alpha;
+  this.uniforms.fadeDistance.value.copy(this.fadeDistance);
+}
+
+THREE.ShaderLib.densPosition = {
+  uniforms: {
+    local: {type: 'i', value: 0},
+    alpha: {type: 'f', value: 0},
+    fadeDistance: {type: 'v3', value: new THREE.Vector3()},
+  },
+  
+  vertexShader: THREE.ShaderLib.densCoordinate.vertexShader,
+  
+  fragmentShader: [
+   'uniform float alpha;',
+   'uniform vec3 fadeDistance;',
+    
+   'varying vec3 vPosition;',
+    
+   'void main() {',
+     'gl_FragColor = vec4(abs(mod(vPosition, fadeDistance)*2.0/fadeDistance - 1.0), alpha);',
+   '}'
+  ].join('\n'),
+}
+
+THREE.Densaugeo.NormalMaterial = function(/*Object*/ options) {
+  THREE.ShaderMaterial.call(this);
+  
+  this.type = 'NormalMaterial';
+  
+  this.vertexShader   = THREE.ShaderLib.densNormal.vertexShader;
+  this.fragmentShader = THREE.ShaderLib.densNormal.fragmentShader;
+  this.local = 0;
+  this.alpha = 1;
+  this.mode  = 0;
+  this.uniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.densNormal.uniforms);
+  
+  this.setValues(options);
+  this.updateUniforms();
+}
+THREE.Densaugeo.NormalMaterial.prototype = Object.create(THREE.ShaderMaterial.prototype);
+THREE.Densaugeo.NormalMaterial.prototype.constructor = THREE.Densaugeo.NormalMaterial;
+
+THREE.Densaugeo.NormalMaterial.prototype.updateUniforms = function(values) {
+  this.uniforms.local.value = this.local;
+  this.uniforms.alpha.value = this.alpha;
+  this.uniforms.mode .value = this.mode ;
+}
+
+THREE.ShaderLib.densNormal = {
+  uniforms: {
+    local: {type: 'i', value: 0},
+    alpha: {type: 'f', value: 0},
+    mode : {type: 'i', value: 0},
+  },
+  
+  vertexShader: [
+   'uniform int local;',
+    
+   'varying vec3 vNormal;',
+    
+   'void main() {',
+     'if(local != 0) {',
+       'vNormal = normal;',
+     '}',
+     'else {',
+       'vNormal = vec3(modelMatrix*vec4(position + normal, 1.0)) - vec3(modelMatrix*vec4(position,1.0));',
+     '}',
+      
+     'gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);',
+   '}'
+  ].join('\n'),
+  
+  fragmentShader: [
+   'uniform float alpha;',
+   'uniform int mode;',
+    
+   'varying vec3 vNormal;',
+    
+   'void main() {',
+     'if(mode == 0) {',
+       'gl_FragColor = vec4(abs(vNormal), alpha);',
+     '}',
+     'else {',
+       'gl_FragColor = vec4((vNormal + 1.0)/2.0, alpha);',
+     '}',
+   '}'
+  ].join('\n'),
+}
+
+THREE.Densaugeo.PsychMaterial = function(/*Object*/ options) {
+  THREE.ShaderMaterial.call(this);
+  
+  this.type = 'PsychMaterial';
+  
+  this.vertexShader   = THREE.ShaderLib.densPsych.vertexShader;
+  this.fragmentShader = THREE.ShaderLib.densPsych.fragmentShader;
+  this.local = 0;
+  this.alpha = 1;
+  this.wavelength = new THREE.Vector3(8    , 4   , 2  );
+  this.frequency  = new THREE.Vector3(0.125, 0.25, 0.5);
+  this.uniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.densPsych.uniforms);
+  
+  this.setValues(options);
+  this.updateUniforms();
+}
+THREE.Densaugeo.PsychMaterial.prototype = Object.create(THREE.ShaderMaterial.prototype);
+THREE.Densaugeo.PsychMaterial.prototype.constructor = THREE.Densaugeo.PsychMaterial;
+
+THREE.Densaugeo.PsychMaterial.prototype.updateUniforms = function(values) {
+  this.uniforms.local.value = this.local;
+  this.uniforms.alpha.value = this.alpha;
+  this.uniforms.wavelength.value.copy(this.wavelength);
+  this.uniforms.frequency .value.copy(this.frequency );
+}
+
+THREE.Densaugeo.PsychMaterial.prototype.tick = function(seconds) {
+  this.uniforms.time.value += seconds;
+}
+
+THREE.ShaderLib.densPsych = {
+  uniforms: {
+    local: {type: 'i', value: 0},
+    time : {type: 'f', value: 0},
+    alpha: {type: 'f', value: 0},
+    wavelength: {type: 'v3', value: new THREE.Vector3()},
+    frequency : {type: 'v3', value: new THREE.Vector3()},
+  },
+  
+  vertexShader: THREE.ShaderLib.densCoordinate.vertexShader,
+  
+  fragmentShader: [
+   'uniform float time;',
+   'uniform float alpha;',
+   'uniform vec3 wavelength;',
+   'uniform vec3 frequency;',
+    
+   'varying vec3 vPosition;',
+    
+   'void main() {',
+     'gl_FragColor = vec4(sin(vPosition*2.0*3.14159/wavelength + time*2.0*3.14159*frequency), alpha);',
+   '}'
+  ].join('\n'),
+}
