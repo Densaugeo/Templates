@@ -1,3 +1,11 @@
+/**
+ * Dependencies: THREE.js
+ */
+
+if(window.THREE == null) {
+  console.error('THREE.Densaugeo.js depends on THREE.js');
+}
+
 THREE.Densaugeo = {}
 
 // Chainable builder for THREE.Object3D stuff
@@ -6,7 +14,7 @@ THREE.Densaugeo = {}
 // f3D(THREE.Object3D, {position: [1, 2, 3]}, [child_one, child_two])
 // 'type' argument may be either a constructor or a clonable object
 THREE.Densaugeo.forgeObject3D = function forgeObject3D(type, properties, children) {
-  var o3D = typeof type === 'function' ? new type() : type.clone();
+  var o3D = typeof type === 'function' ? new type() : type;
   
   if(properties.position instanceof Array) {
     properties.position = new THREE.Vector3().fromArray(properties.position);
@@ -209,6 +217,16 @@ THREE.MeshFaceMaterial.prototype.makeFlat = function() {
 THREE.Matrix4.prototype.translateX = function(x) {var a = this.elements; a[12] += a[0]*x; a[13] += a[1]*x; a[14] += a[ 2]*x; return this}
 THREE.Matrix4.prototype.translateY = function(y) {var a = this.elements; a[12] += a[4]*y; a[13] += a[5]*y; a[14] += a[ 6]*y; return this}
 THREE.Matrix4.prototype.translateZ = function(z) {var a = this.elements; a[12] += a[8]*z; a[13] += a[9]*z; a[14] += a[10]*z; return this}
+
+THREE.Matrix4.prototype.equals = function(m) {
+  var r = true, a = this.elements, b = m.elements;
+  
+  for(var i = 0, endi = 16; i < endi; ++i) {
+    r = r && a[i] === b[i];
+  }
+  
+  return r;
+}
 
 // panKeySpeed           - Units/ms
 // panMouseSpeed         - Units/px
