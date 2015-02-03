@@ -256,7 +256,9 @@ THREE.Densaugeo.FreeControls = function(camera, domElement, options) {
   var inputs = {}; // This particular ; really is necessary
   
   document.addEventListener('keydown', function(e) {
-    inputs[e.keyCode] = true;
+    if(!e.altKey && !e.ctrlKey && !e.shiftKey) {
+      inputs[e.keyCode] = true;
+    }
   });
   
   document.addEventListener('keyup', function(e) {
@@ -511,6 +513,38 @@ THREE.Vector3.prototype.fromColor = function(/*THREE.Color*/ a) {
   return this;
 }
 
+// Expects string as comma-separated numbers
+THREE.Vector3.prototype.fromString = function(/*string*/ a) {
+  var b = a.split(',');
+  
+  this.x = Number(b[0]);
+  this.y = Number(b[1]);
+  this.z = Number(b[2]);
+  
+  return this;
+}
+
+THREE.Vector3.prototype.toString = function() {
+  return this.x + ', ' + this.y + ', ' + this.z;
+}
+
+THREE.Color.prototype.fromVector3 = function(/*THREE.Vector3*/ a) {
+  this.r = a.x;
+  this.g = a.y;
+  this.b = a.z;
+  
+  return this;
+}
+
+// Expects string in hex format
+THREE.Color.prototype.fromString = function(/*string*/ a) {
+  return this.copy(new THREE.Color(a));
+}
+
+THREE.Color.prototype.toString = function() {
+  return '#' + this.getHexString().toUpperCase();
+}
+
 /**
  * A collection of shaders:
  * 
@@ -548,7 +582,7 @@ THREE.Vector3.prototype.fromColor = function(/*THREE.Color*/ a) {
  * 
  * PositionMaterial          THREE.Vector3  fadeDistance - Distance along an axis to fade its associated color from one to zero
  * 
- * NormalMaterial            Number         mode         - Changes how olors are calculated, not sure how to describe
+ * NormalMaterial            Number         mode         - Changes how colors are calculated, not sure how to describe
  * 
  * PsychMaterial             THREE.Vector3  wavelength   - Distance along each axes between its associated color peaks
  *                           THREE.Vector3  frequency    - Frequency of color peaks as they travel along each axis
