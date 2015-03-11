@@ -351,7 +351,7 @@ THREE.Densaugeo.FreeControls = function(camera, domElement, options) {
     if(e.touches.length === 0) {
       domElement.removeEventListener('touchmove', TouchHandler);
       domElement.removeEventListener('touchmove', touchThrottleHandler);
-      touchThrottle = rotationRateAlpha = rotationRateBeta = 0;
+      touchThrottle = rotationRateAlpha = rotationRateBeta = rotationRateGamma = 0;
       accelActive = false;
     }
   });
@@ -398,6 +398,7 @@ THREE.Densaugeo.FreeControls = function(camera, domElement, options) {
       // Constant = Math.PI/180/1000
       rotationRateAlpha = e.rotationRate.alpha*rotationRateConversion*self.rotationAccelSpeed;
       rotationRateBeta  = e.rotationRate.beta *rotationRateConversion*self.rotationAccelSpeed;
+      rotationRateGamma = e.rotationRate.gamma*rotationRateConversion*self.rotationAccelSpeed;
     }
   }
   
@@ -419,13 +420,14 @@ THREE.Densaugeo.FreeControls = function(camera, domElement, options) {
   var touchZeroPrevious;
   var touchOnePrevious;
   var throttleZero, touchThrottle = 0;
-  var rotationRateAlpha = 0, rotationRateBeta = 0, accelActive = false;
+  var rotationRateAlpha = 0, rotationRateBeta = 0, rotationRateGamma = 0, accelActive = false;
   
   var timePrevious = Date.now();
   var time = 0;
   
   // Working variables for camLoop
-  var translateX = 0, translateY = 0, translateZ = 0, translateGlobalZ = 0, rotateX = 0, rotateGlobalZ = 0, axes;
+  var translateX = 0, translateY = 0, translateZ = 0, translateGlobalZ = 0;
+  var rotateX = 0, rotateY = 0, rotateZ = 0, rotateGlobalZ = 0, axes;
   
   var camLoop = function() {
     time = Date.now() - timePrevious;
@@ -473,7 +475,15 @@ THREE.Densaugeo.FreeControls = function(camera, domElement, options) {
       camera.matrix.multiply(new THREE.Matrix4().makeRotationX(rotateX - time*rotationRateBeta));
     }
     
-    if(rotateGlobalZ || rotationRateAlpha) {
+    if(rotateY || rotationRateAlpha) {
+      camera.matrix.multiply(new THREE.Matrix4().makeRotationY(rotateY + time*rotationRateAlpha));
+    }
+    
+    if(rotateZ || rotationRateGamma) {
+      camera.matrix.multiply(new THREE.Matrix4().makeRotationZ(rotateZ + time*rotationRateGamma));
+    }
+    
+    if(rotateGlobalZ) {
       // Global Z rotation retains global position
       var position = THREE.Vector3.prototype.setFromMatrixPosition(camera.matrix);
       camera.matrix.multiplyMatrices(new THREE.Matrix4().makeRotationZ(rotateGlobalZ + time*rotationRateAlpha), camera.matrix);
@@ -484,7 +494,7 @@ THREE.Densaugeo.FreeControls = function(camera, domElement, options) {
     
     requestAnimationFrame(camLoop);
     
-    translateX = translateY = translateZ = translateGlobalZ = rotateX = rotateGlobalZ = 0;
+    translateX = translateY = translateZ = translateGlobalZ = rotateX = rotateY = rotateZ = rotateGlobalZ = 0;
   }
   camLoop();
 }
