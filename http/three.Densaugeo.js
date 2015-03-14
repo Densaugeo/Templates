@@ -639,6 +639,126 @@ with({p: THREE.Densaugeo.FreeControls.prototype}) {
   p.keyBackward = 83; // S
 }
 
+/**
+ * @module THREE.Densaugeo.IntObject inherits THREE.Object3D
+ * @description Clickable object for three.js scenes
+ * 
+ * @example var clickable = new THREE.Densaugeo.IntObject({name: 'Clickable'});
+ * @example clickable.indicatorMatrix.forge({sx: 4, sy: 4});
+ * @example clickable.controls.Click = function() {alert('You clicked me!')}
+ */
+THREE.Densaugeo.IntObject = function IntObject(options) {
+  THREE.Object3D.call(this, options);
+  
+  // @prop Object controls -- An index of the functions to be controlled by a UI element
+  this.controls = {};
+  
+  // @prop THREE.Matrix4 indicatorMatrix -- Matrix transform for visual indication object added by THREE.Densaugeo.Picker
+  // @option THREE.Matrix4 indicatorMatrix -- Sets .indicatorMatrix
+  this.indicatorMatrix = new THREE.Matrix4();
+  
+  // @option String name -- Sets .name inherited from THREE.Object3D
+  if(options && options.name) {
+    this.name = options.name;
+  }
+}
+THREE.Densaugeo.IntObject.prototype = Object.create(THREE.Object3D.prototype);
+THREE.Densaugeo.IntObject.prototype.constructor = THREE.Densaugeo.IntObject;
+
+/**
+ * @module THREE.Densaugeo.Picker inherites EventEmitter
+ * @description Allows selecting objects in a three.js scene by clicking on meshes
+ * 
+ * @example var picker = new THREE.Densaugeo.Picker();
+ * @example someRenderer.domElement.addEventListener('click', picker.clickHandler);
+ * @example picker.intObjects.push(someClickableObject);
+ * @example picker.on('select', function(e) {console.log('Selected: ');console.log(e.target)});
+ */
+THREE.Densaugeo.Picker = function Picker(options) {
+  EventEmitter.call(this, options);
+  
+  var self = this;
+  
+  // @prop [THREE.Densaugeo.IntObject] intObjects -- Objects which can be picked (interacted with)
+  this.intObjects = [];
+  
+  // @prop THREE.Densaugeo.IntObject currentlySelected -- As the name suggests (undefined if no object is selected)
+  this.currentlySelected = undefined;
+  
+  // @prop THREE.Mesh indicator -- three.js object appended to selection to provide a visual cue
+  // @option THREE.Mesh indicator -- Sets .indicator
+  this.indicator = options && options.indicator || new THREE.Mesh(new THREE.RingGeometry(1.1, 1.2, 16), new THREE.MeshBasicMaterial({color: 0x00FFFF, side: THREE.DoubleSide}));
+  this.indicator.matrixAutoUpdate = false;
+  
+  // @method undefined unselect() -- Unselects current object
+  // @event unselect {} -- Fired after unselecting
+  this.unselect = function() {
+    if(self.currentlySelected) {
+      self.currentlySelected.remove(self.indicator);
+    }
+    
+    self.currentlySelected = undefined;
+    
+    self.emit('unselect');
+  }
+  
+  var raycaster = new THREE.Raycaster();
+  var mouse = new THREE.Vector2();
+  
+  // @method undefined clickHandler(e) -- Handles click events; scans a three.js scene
+  // @event select {THREE.Densaugeo.IntObject target} -- Emitted when a target's child mesh has been clicked
+  this.clickHandler = function(e) {
+    e.preventDefault();
+    
+    var boundingRect = renderer.domElement.getBoundingClientRect();
+    
+    mouse.x = (e.clientX - boundingRect.x)/boundingRect.width*2 - 1;
+    mouse.y = (boundingRect.y - e.clientY)/boundingRect.height*2 + 1;
+    
+    raycaster.setFromCamera(mouse, camera);
+    
+    var intersections = raycaster.intersectObjects(self.intObjects, true);
+    
+    if(intersections.length > 0) {
+      var target = intersections[0].object;
+      
+      while(!(target instanceof THREE.Densaugeo.IntObject)) {
+        target = target.parent;
+      }
+      
+      if(self.currentlySelected) {
+        self.currentlySelected.remove(self.indicator);
+      }
+      
+      self.currentlySelected = target;
+      self.indicator.matrix.copy(target.indicatorMatrix);
+      target.add(self.indicator);
+      
+      self.emit('select', {target: target});
+    }
+  }
+}
+THREE.Densaugeo.Picker.prototype = Object.create(EventEmitter.prototype);
+THREE.Densaugeo.Picker.prototype.constructor = THREE.Densaugeo.Picker;
+
+/**
+ * @module THREE.Raycaster
+ * @description Bug fix for camera matrix handling. No, upstream won't accept the patch, because "users shouldn't use matrix transforms" WTF?!!!!
+ */
+// @method proto undefined setFromCamera(THREE.Vector2 coords, THREE.Camera camera) -- Responds correctly to cameras with mutated matrices
+THREE.Raycaster.prototype.setFromCamera = function ( coords, camera ) {
+  // camera is assumed _not_ to be a child of a transformed object
+  if ( camera instanceof THREE.PerspectiveCamera ) {
+    this.ray.origin.setFromMatrixPosition(camera.matrix);
+    this.ray.direction.set( coords.x, coords.y, 0.5 ).unproject( camera ).sub( this.ray.origin ).normalize();
+  } else if ( camera instanceof THREE.OrthographicCamera ) {
+    this.ray.origin.set( coords.x, coords.y, - 1 ).unproject( camera );
+    this.ray.direction.set( 0, 0, - 1 ).transformDirection( camera.matrixWorld );
+  } else {
+    console.error( 'THREE.Raycaster: Unsupported camera type.' );
+  }
+}
+
 THREE.Vector3.prototype.fromColor = function(/*THREE.Color*/ a) {
   this.x = a.r;
   this.y = a.g;
