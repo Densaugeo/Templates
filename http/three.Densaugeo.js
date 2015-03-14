@@ -218,6 +218,90 @@ THREE.Matrix4.prototype.translateX = function(x) {var a = this.elements; a[12] +
 THREE.Matrix4.prototype.translateY = function(y) {var a = this.elements; a[12] += a[4]*y; a[13] += a[5]*y; a[14] += a[ 6]*y; return this}
 THREE.Matrix4.prototype.translateZ = function(z) {var a = this.elements; a[12] += a[8]*z; a[13] += a[9]*z; a[14] += a[10]*z; return this}
 
+THREE.Matrix4.prototype.rotateX = function(angle) {
+  var te = this.elements;
+  
+  var m12 = te[4];
+  var m22 = te[5];
+  var m32 = te[6];
+  var m42 = te[7];
+  var m13 = te[8];
+  var m23 = te[9];
+  var m33 = te[10];
+  var m43 = te[11];
+  
+  var c = Math.cos( angle );
+  var s = Math.sin( angle );
+  
+  te[4] = c * m12 + s * m13;
+  te[5] = c * m22 + s * m23;
+  te[6] = c * m32 + s * m33;
+  te[7] = c * m42 + s * m43;
+  
+  te[8] = c * m13 - s * m12;
+  te[9] = c * m23 - s * m22;
+  te[10] = c * m33 - s * m32;
+  te[11] = c * m43 - s * m42;
+  
+  return this;
+}
+
+THREE.Matrix4.prototype.rotateY = function(angle) {
+  var te = this.elements;
+  
+  var m11 = te[0];
+  var m21 = te[1];
+  var m31 = te[2];
+  var m41 = te[3];
+  var m13 = te[8];
+  var m23 = te[9];
+  var m33 = te[10];
+  var m43 = te[11];
+  
+  var c = Math.cos( angle );
+  var s = Math.sin( angle );
+  
+  te[0] = c * m11 - s * m13;
+  te[1] = c * m21 - s * m23;
+  te[2] = c * m31 - s * m33;
+  te[3] = c * m41 - s * m43;
+  
+  te[8] = c * m13 + s * m11;
+  te[9] = c * m23 + s * m21;
+  te[10] = c * m33 + s * m31;
+  te[11] = c * m43 + s * m41;
+  
+  return this;
+}
+
+THREE.Matrix4.prototype.rotateZ = function (angle) {
+  var te = this.elements;
+  
+  var m11 = te[0];
+  var m21 = te[1];
+  var m31 = te[2];
+  var m41 = te[3];
+  var m12 = te[4];
+  var m22 = te[5];
+  var m32 = te[6];
+  var m42 = te[7];
+  
+  var c = Math.cos( angle );
+  var s = Math.sin( angle );
+  
+  te[0] = c * m11 + s * m12;
+  te[1] = c * m21 + s * m22;
+  te[2] = c * m31 + s * m32;
+  te[3] = c * m41 + s * m42;
+  
+  te[4] = c * m12 - s * m11;
+  te[5] = c * m22 - s * m21;
+  te[6] = c * m32 - s * m31;
+  te[7] = c * m42 - s * m41;
+  
+  return this;
+}
+
 THREE.Matrix4.prototype.equals = function(m) {
   var r = true, a = this.elements, b = m.elements;
   
@@ -226,6 +310,38 @@ THREE.Matrix4.prototype.equals = function(m) {
   }
   
   return r;
+}
+
+THREE.Matrix4.prototype.forge = function(a) {
+  var tx = a.tx || 0, ty = a.ty || 0, tz = a.tz || 0;
+  var θx = a.rx || 0, θy = a.ry || 0, θz = a.rz || 0;
+  var sx = a.sx || 1, sy = a.sy || 1, sz = a.sz || 1;
+  
+  var e = this.elements;
+  var sin = Math.sin;
+  var cos = Math.cos;
+  
+  e[0] = sx*cos(θy)*cos(θz);
+  e[1] = sx*sin(θx)*sin(θy)*cos(θz) + sx*cos(θx)*sin(θz);
+  e[2] = sx*sin(θx)*sin(θz) - sx*cos(θx)*sin(θy)*cos(θz);
+  e[3] = 0;
+  
+  e[4] = -sy*cos(θy)*sin(θz);
+  e[5] = sy*cos(θx)*cos(θz) - sy*sin(θx)*sin(θy)*sin(θz);
+  e[6] = sy*sin(θx)*cos(θz) + sy*cos(θx)*sin(θy)*sin(θz);
+  e[7] = 0;
+  
+  e[8] = sz*sin(θy);
+  e[9] = -sz*sin(θx)*cos(θy);
+  e[10] = sz*cos(θx)*cos(θy);
+  e[11] = 0;
+  
+  e[12] = tx;
+  e[13] = ty;
+  e[14] = tz;
+  e[15] = 1;
+  
+  return this;
 }
 
 // panKeySpeed           - Units/ms
