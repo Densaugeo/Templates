@@ -679,6 +679,9 @@ THREE.Densaugeo.Picker = function Picker(options) {
   
   var self = this;
   
+  // @prop THREE.WebGLRenderer renderer -- May be an empty object if not set
+  this.renderer = {};
+  
   // @prop [THREE.Densaugeo.IntObject] intObjects -- Objects which can be picked (interacted with)
   this.intObjects = [];
   
@@ -710,7 +713,7 @@ THREE.Densaugeo.Picker = function Picker(options) {
   this.clickHandler = function(e) {
     e.preventDefault();
     
-    var boundingRect = renderer.domElement.getBoundingClientRect();
+    var boundingRect = self.renderer.domElement.getBoundingClientRect();
     
     mouse.x = (e.clientX - boundingRect.x)/boundingRect.width*2 - 1;
     mouse.y = (boundingRect.y - e.clientY)/boundingRect.height*2 + 1;
@@ -736,6 +739,24 @@ THREE.Densaugeo.Picker = function Picker(options) {
       
       self.emit('select', {target: target});
     }
+  }
+  
+  // @method undefined touchHandler(e) -- Maps touch events onto click events. Uses touchstart's first detected touch
+  this.touchHandler = function(e) {
+    if(e.touches.length > 0) {
+      e.clientX = e.touches[0].clientX;
+      e.clientY = e.touches[0].clientY;
+      
+      self.clickHandler(e);
+    }
+  }
+  
+  // @method undefined setRenderer() -- Attach a three.js renderer
+  this.setRenderer = function(renderer) {
+    self.renderer = renderer;
+    
+    renderer.domElement.addEventListener('click', self.clickHandler);
+    renderer.domElement.addEventListener('touchstart', self.touchHandler);
   }
 }
 THREE.Densaugeo.Picker.prototype = Object.create(EventEmitter.prototype);
