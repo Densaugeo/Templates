@@ -879,7 +879,7 @@ THREE.Densaugeo.WaterMaterial = function(/*Object*/ options) {
   this.specular = new THREE.Color(0x193366);
   
   this.uniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.densWater.uniforms);
-  this.uniforms.normalSampler.value = THREE.ImageUtils.loadTexture('waternormals.jpg');
+  this.uniforms.normalSampler.value = THREE.ImageUtils.loadTexture('lib/waternormals.jpg');
   this.uniforms.normalSampler.value.wrapS = this.uniforms.normalSampler.value.wrapT = THREE.RepeatWrapping;
   
   this.setValues(options);
