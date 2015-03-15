@@ -644,7 +644,7 @@ with({p: THREE.Densaugeo.FreeControls.prototype}) {
  * @description Clickable object for three.js scenes
  * 
  * @example var clickable = new THREE.Densaugeo.IntObject({name: 'Clickable'});
- * @example clickable.indicatorMatrix.forge({sx: 4, sy: 4});
+ * @example clickable.select.forge({sx: 4, sy: 4});
  * @example clickable.controls.Click = function() {alert('You clicked me!')}
  */
 THREE.Densaugeo.IntObject = function IntObject(options) {
@@ -653,9 +653,9 @@ THREE.Densaugeo.IntObject = function IntObject(options) {
   // @prop Object controls -- An index of the functions to be controlled by a UI element
   this.controls = {};
   
-  // @prop THREE.Matrix4 indicatorMatrix -- Matrix transform for visual indication object added by THREE.Densaugeo.Picker
-  // @option THREE.Matrix4 indicatorMatrix -- Sets .indicatorMatrix
-  this.indicatorMatrix = new THREE.Matrix4();
+  // @prop THREE.Matrix4 select -- Matrix transform for visual indication object added by THREE.Densaugeo.Picker
+  // @option THREE.Matrix4 select -- Sets .indicatorMatrix
+  this.select = options && options.select || new THREE.Matrix4();
   
   // @option String name -- Sets .name inherited from THREE.Object3D
   if(options && options.name) {
@@ -731,7 +731,7 @@ THREE.Densaugeo.Picker = function Picker(options) {
       }
       
       self.currentlySelected = target;
-      self.indicator.matrix.copy(target.indicatorMatrix);
+      self.indicator.matrix.copy(target.select);
       target.add(self.indicator);
       
       self.emit('select', {target: target});
