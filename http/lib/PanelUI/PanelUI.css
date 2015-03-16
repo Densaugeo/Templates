@@ -1,6 +1,7 @@
 body {
-  font-family: 'Helvetica';
-  font-size: 12pt;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.42857143;
 }
 #background {
   position: absolute;
@@ -50,4 +51,9 @@ body {
   margin: 6px;
   font-size: 24px;
   text-align: center;
+}
+
+.well {
+  padding: 0 19px;
+  border-radius: 4px;
 }

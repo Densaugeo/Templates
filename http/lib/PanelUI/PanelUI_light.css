@@ -12,7 +12,7 @@ body {
 }
 #sidebar:hover,
 #sidebar:focus {
-  box-shadow: 0 0 5px 3px #0FF;
+  box-shadow: 0 0 5px 3px #088;
 }
 
 .panel {
@@ -21,7 +21,7 @@ body {
 }
 .panel:hover,
 .panel:focus {
-  box-shadow: 0 0 5px 3px #0FF;
+  box-shadow: 0 0 5px 3px #088;
 }
 .panel_close {
   background: rgba(255, 255, 255, 0.75);
@@ -38,4 +38,10 @@ body {
 }
 .button:focus {
   outline: 1px solid #0AA;
+}
+
+.well {
+  border: 1px solid #888;
+  background-image: linear-gradient(to top, rgba(192, 192, 192, 0.3) 0px, rgba(255, 255, 255, 0.3) 100%);
+  box-shadow: 0px 0px 2px #888 inset;
 }

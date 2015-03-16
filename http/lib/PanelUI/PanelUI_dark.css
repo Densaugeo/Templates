@@ -39,3 +39,9 @@ body {
 .button:focus {
   outline: 1px solid #0FF;
 }
+
+.well {
+  border: 1px solid #888;
+  background-image: linear-gradient(to bottom, rgba(96, 96, 96, 0.3) 0px, rgba(0, 0, 0, 0.3) 100%);
+  box-shadow: 0px 0px 2px #888 inset;
+}
