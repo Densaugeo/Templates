@@ -84,6 +84,8 @@ panel.open();
 
 `undefined` proto **open**`()` -- Adds Panel's domElement to the document
 
+`undefined` proto **toggleOpen**`()` -- Toggle .domElement on and off of document.body
+
 #### Events
 
 **close** `{}` -- Fired on panel close
