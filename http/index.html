@@ -130,12 +130,7 @@ sidebar.on('land', function(e) {
 });
 
 sidebar.on('help', function(e) {
-  if(helpPanel.isOpen()) {
-    helpPanel.close();
-  } else {
-    helpPanel.open();
-    helpPanel.domElement.focus();
-  }
+  helpPanel.toggleOpen(true);
 });
 
 sidebar.on('fs', function(e) {

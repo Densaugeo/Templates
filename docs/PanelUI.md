@@ -82,9 +82,9 @@ panel.open();
 
 `Boolean` proto **isOpen**`()` -- Returns whether panel is currently open (attached to document)
 
-`undefined` proto **open**`()` -- Adds Panel's domElement to the document
+`undefined` proto **open**`(Boolean focus)` -- Adds Panel's domElement to the document. If focus is set, also focuses .domElement
 
-`undefined` proto **toggleOpen**`()` -- Toggle .domElement on and off of document.body
+`undefined` proto **toggleOpen**`(Boolean focus)` -- Toggle .domElement on and off of document.body
 
 #### Events
 
