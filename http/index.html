@@ -87,14 +87,18 @@ ProjectPanel.prototype = Object.create(PanelUI.Panel.prototype);
 ProjectPanel.prototype.constructor = ProjectPanel;
 
 // Shim for vendor-prefixed fullscreen API
-if(HTMLElement.prototype.requestFullscreen == null) {
+if(HTMLElement.prototype.requestFullscreen == undefined) {
   HTMLElement.prototype.requestFullscreen = HTMLElement.prototype.msRequestFullscreen || HTMLElement.prototype.mozRequestFullScreen || HTMLElement.prototype.webkitRequestFullscreen;
 }
-if(document.exitFullscreen == null) {
+if(document.exitFullscreen == undefined) {
   document.exitFullscreen = document.msExitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen;
 }
-var getFullscreenElement = function() {
-  return document.fullscreenElement || document.msFullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+if(document.fullscreenElement === undefined) {
+  Object.defineProperty(document, 'fullscreenElement', {
+    get: function() {
+      return document.msFullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+    },
+  });
 }
 
 ///////////////
@@ -134,7 +138,7 @@ sidebar.on('help', function(e) {
 });
 
 sidebar.on('fs', function(e) {
-  if(getFullscreenElement() == null) {
+  if(document.fullscreenElement == null) {
     document.body.requestFullscreen();
   } else {
     document.exitFullscreen();
