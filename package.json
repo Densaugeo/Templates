@@ -9,5 +9,11 @@
     "moment": "~2.10.3",
     "hapi": "~8.8.0",
     "good": "~6.3.0"
+  },
+  "devDependencies": {
+    "bower": "~1.4.1"
+  },
+  "scripts": {
+    "install-bower": "bower install"
   }
 }
