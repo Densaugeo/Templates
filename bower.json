@@ -2,6 +2,7 @@
   "name": "Template",
   "version": "0.0.0",
   "dependencies": {
+    "persistent-ws": "~0.0.5",
     "font-awesome": "~4.3.0"
   }
 }

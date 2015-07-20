@@ -1,3 +1,5 @@
+var PersistentWS = window.PersistentWS = require('./bower_components/persistent-ws/');
+
 ///////////////
 // Utilities //
 ///////////////
@@ -108,12 +110,12 @@ if(localStorage.contrast === 'light') {
 // WebSocket //
 ///////////////
 
-/*var ws =  new WebSocket('ws://' + window.location.host);
+var ws = window.ws = new PersistentWS({url: window.location.protocol.replace('http', 'ws') + '//' + window.location.host});
 
-ws.onmessage = function(e) {
+ws.addEventListener('message', function(e) {
   console.log('Received message: ' + e.data);
   console.log(e);
-}*/
+});
 
 /////////////////////
 // Startup scripts //
