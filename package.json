@@ -18,6 +18,6 @@
   "scripts": {
     "install-bower": "bower install",
     "lint": "jshint *.js http/*.js",
-    "build-client": "browserify http/app.js > http/app.pkgd.js"
+    "build-client": "browserify http/index.js > http/index.pkgd.js"
   }
 }
