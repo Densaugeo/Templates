@@ -11,9 +11,11 @@
     "good": "~6.3.0"
   },
   "devDependencies": {
-    "bower": "~1.4.1"
+    "bower": "~1.4.1",
+    "browserify": "~10.2.6"
   },
   "scripts": {
-    "install-bower": "bower install"
+    "install-bower": "bower install",
+    "build-client": "browserify http/app.js > http/app.pkgd.js"
   }
 }
