@@ -23,7 +23,7 @@
   "devDependencies": {
     "bower": "~1.4.1",
     "browserify": "~11.0.0",
-    "persistent-ws": "git+https://github.com/Densaugeo/PersistentWS.git",
+    "persistent-ws": "~0.0.7",
     "jshint": "~2.8.0"
   },
   "scripts": {
