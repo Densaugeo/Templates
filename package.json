@@ -30,7 +30,6 @@
   "scripts": {
     "install": "npm install --prefix=http font-awesome",
     "lint": "jshint *.js http/*.js",
-    "build-panelui": "browserify --standalone=PanelUI http/lib/PanelUI/PanelUI.js > http/lib/PanelUI/PanelUI.pkgd.js",
     "build-client": "browserify http/libs.js > http/libs.pkgd.js"
   }
 }
