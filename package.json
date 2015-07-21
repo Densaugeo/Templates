@@ -23,6 +23,7 @@
   "devDependencies": {
     "browserify": "~11.0.0",
     "persistent-ws": "~0.0.7",
+    "asynter": "~0.1.4",
     "jshint": "~2.8.0"
   },
   "scripts": {

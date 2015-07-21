@@ -1,7 +1,8 @@
 /**
- * @depends EventEmitter.js
+ * @depends AsyNTer
  * @depends Draggabilliy.js
  */
+var AsyNTer = require('asynter');
 
 var PanelUI = exports;
 
@@ -21,7 +22,7 @@ PanelUI.forgeElement = function forgeElement(tagName, properties, children) {
 var fE = PanelUI.forgeElement;
 
 /**
- * @module PanelUI.Sidebar inherits EventEmitter
+ * @module PanelUI.Sidebar inherits AsyNTer.Node
  * @description Makes a sidebar. Buttons added to the sidebar can be triggered by clicks or keyboard shortcuts 1-9, 0, -, and =
  * @description Icons come from Font Awesome and are specified in the faClass option
  * 
@@ -31,7 +32,7 @@ var fE = PanelUI.forgeElement;
  * @example sidebar.on('trigger', function(e) {console.log(e.buttonName === 'do_stuff')});
  */
 PanelUI.Sidebar = function Sidebar() {
-  EventEmitter.call(this);
+  AsyNTer.Node.call(this);
   
   // @prop HTMLElement domElement -- div tag that holds all of the Panel's HTML elements
   this.domElement = fE('div', {id: 'sidebar', tabIndex: 1, accessKey: '1'});
@@ -84,11 +85,11 @@ PanelUI.Sidebar = function Sidebar() {
     }
   });
 }
-PanelUI.Sidebar.prototype = Object.create(EventEmitter.prototype);
+PanelUI.Sidebar.prototype = Object.create(AsyNTer.Node.prototype);
 PanelUI.Sidebar.prototype.constructor = PanelUI.Sidebar;
 
 /**
- * @module PanelUI.Panel inherits EventEmitter
+ * @module PanelUI.Panel inherits AsyNTer.Node
  * @description Makes a panel. Includes draggability and close button
  * 
  * @example var panel = new PanelUI.Panel({id: 'css_id', heading: 'Your heading here', closeButton: true, accessKey: 'a'});
@@ -100,7 +101,7 @@ PanelUI.Sidebar.prototype.constructor = PanelUI.Sidebar;
  * @option String  id          -- CSS ID
  */
 PanelUI.Panel = function Panel(options) {
-  EventEmitter.call(this);
+  AsyNTer.Node.call(this);
   
   var self = this;
   
@@ -151,7 +152,7 @@ PanelUI.Panel = function Panel(options) {
     localStorage['dragger_' + domElement.id + '_left'] = domElement.style.left;
   });
 }
-PanelUI.Panel.prototype = Object.create(EventEmitter.prototype);
+PanelUI.Panel.prototype = Object.create(AsyNTer.Node.prototype);
 PanelUI.Panel.prototype.constructor = PanelUI.Panel;
 
 // @method proto undefined open(Boolean focus) -- Adds Panel's domElement to the document. If focus is set, also focuses .domElement
