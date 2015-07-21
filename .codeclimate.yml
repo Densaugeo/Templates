@@ -8,4 +8,5 @@ exclude_paths:
 - "*.min.js"
 - "http/*.pkgd.js"
 - "http/*.min.js"
+- "http/libs.js"
 - "lib/*"
