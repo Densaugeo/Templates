@@ -11,18 +11,19 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "ws": "~0.7.2",
-    "good-file": "~5.0.1",
+    "good": "~6.3.0",
     "good-console": "~5.0.1",
-    "moment": "~2.10.3",
+    "good-file": "~5.0.1",
     "hapi": "~8.8.0",
-    "good": "~6.3.0"
+    "moment": "~2.10.3",
+    "ws": "~0.7.2"
   },
   "author": "Densaugeo <a@b.c> (http://www.madengineersworkshop.net/)",
   "bugs": "https://github.com/Densaugeo/Templates/issues",
   "devDependencies": {
     "bower": "~1.4.1",
     "browserify": "~11.0.0",
+    "persistent-ws": "git+https://github.com/Densaugeo/PersistentWS.git",
     "jshint": "~2.8.0"
   },
   "scripts": {

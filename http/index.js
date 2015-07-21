@@ -1,4 +1,4 @@
-var PersistentWS = window.PersistentWS = require('./bower_components/persistent-ws/');
+var PersistentWS = window.PersistentWS = require('persistent-ws');
 
 ///////////////
 // Utilities //
