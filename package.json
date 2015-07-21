@@ -27,6 +27,7 @@
     "jshint": "~2.8.0"
   },
   "scripts": {
+    "install": "npm install --prefix=http font-awesome",
     "install-bower": "bower install",
     "lint": "jshint *.js http/*.js",
     "build-client": "browserify http/index.js > http/index.pkgd.js"
