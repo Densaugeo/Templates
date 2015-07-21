@@ -1,8 +1,9 @@
 /**
  * @depends AsyNTer
- * @depends Draggabilliy.js
+ * @depends Draggabilliy
  */
 var AsyNTer = require('asynter');
+var Draggabilly = require('draggabilly');
 
 var PanelUI = exports;
 
