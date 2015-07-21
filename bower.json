@@ -1,7 +1,0 @@
-{
-  "name": "Template",
-  "version": "0.0.0",
-  "dependencies": {
-    "persistent-ws": "~0.0.5"
-  }
-}

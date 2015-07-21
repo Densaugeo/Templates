@@ -21,14 +21,12 @@
   "author": "Densaugeo <a@b.c> (http://www.madengineersworkshop.net/)",
   "bugs": "https://github.com/Densaugeo/Templates/issues",
   "devDependencies": {
-    "bower": "~1.4.1",
     "browserify": "~11.0.0",
     "persistent-ws": "~0.0.7",
     "jshint": "~2.8.0"
   },
   "scripts": {
     "install": "npm install --prefix=http font-awesome",
-    "install-bower": "bower install",
     "lint": "jshint *.js http/*.js",
     "build-client": "browserify http/index.js > http/index.pkgd.js"
   }
