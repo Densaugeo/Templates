@@ -1,14 +1,12 @@
-var PersistentWS = window.PersistentWS = require('persistent-ws');
-
 ///////////////
 // Utilities //
 ///////////////
 
 // Daisy-chainable HTMLElement maker
-var fE = window.fE = PanelUI.forgeElement;
+var fE = PanelUI.forgeElement;
 
 // Best JS inheritance
-var ProjectPanel = window.ProjectPanel = function(options) {
+var ProjectPanel = function(options) {
   PanelUI.Panel.call(this, options);
   
   this.domElement.appendChild(
@@ -44,7 +42,7 @@ if(document.fullscreenElement === undefined) {
 // Instances //
 ///////////////
 
-var sidebar = window.sidebar = new PanelUI.Sidebar();
+var sidebar = new PanelUI.Sidebar();
 sidebar.addButton({buttonName: 'land'    , faClass: 'fa-university', title: 'Landing page'       });
 sidebar.addButton({buttonName: 'help'    , faClass: 'fa-question'  , title: 'Help'               });
 sidebar.addButton({buttonName: 'fs'      , faClass: 'fa-arrows-alt', title: 'Fullscreen'         });
@@ -59,10 +57,10 @@ new ProjectPanel({
   text: 'Features a simple scene with a custom shader and touch + gamepad-friendly camera controls',
 }).open();
 
-var helpPanel = window.helpPanel = new PanelUI.Panel({id: 'help', heading: 'A Panel That Could Be Helpful'});
+var helpPanel = new PanelUI.Panel({id: 'help', heading: 'A Panel That Could Be Helpful'});
 helpPanel.domElement.appendChild(fE('div', {textContent: 'But this is only a demo'}));
 
-var darkColors = window.darkColors = document.getElementById('dark_colors');
+var darkColors = document.getElementById('dark_colors');
 
 ////////////
 // Events //
@@ -110,7 +108,7 @@ if(localStorage.contrast === 'light') {
 // WebSocket //
 ///////////////
 
-var ws = window.ws = new PersistentWS({url: window.location.protocol.replace('http', 'ws') + '//' + window.location.host});
+var ws = new PersistentWS({url: window.location.protocol.replace('http', 'ws') + '//' + window.location.host});
 
 ws.addEventListener('message', function(e) {
   console.log('Received message: ' + e.data);
