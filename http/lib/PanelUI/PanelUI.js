@@ -3,7 +3,7 @@
  * @depends Draggabilliy.js
  */
 
-var PanelUI = {};
+var PanelUI = exports;
 
 // @method HTMLElement forgeElement(String tagName, Object properties, Array children) -- Daisy-chainable element maker
 PanelUI.forgeElement = function forgeElement(tagName, properties, children) {
@@ -183,8 +183,4 @@ PanelUI.Panel.prototype.toggleOpen = function(focus) {
   } else {
     this.open(focus);
   }
-}
-
-if(typeof module != 'undefined' && module != null && module.exports) {
-  module.exports = PanelUI;
 }
