@@ -1,4 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+window.PersistentWS = require('persistent-ws');
+window.Hematite = require('hematite');
+window.EventEmitter = require('asynter').Node;
+
+},{"asynter":12,"hematite":2,"persistent-ws":13}],2:[function(require,module,exports){
 /**
  * @depends AsyNTer
  * @depends Draggabilliy
@@ -6,35 +11,40 @@
 var AsyNTer = require('asynter');
 var Draggabilly = require('draggabilly');
 
-var PanelUI = exports;
+var Hematite = exports;
 
 // @method HTMLElement forgeElement(String tagName, Object properties, Array children) -- Daisy-chainable element maker
-PanelUI.forgeElement = function forgeElement(tagName, properties, children) {
+Hematite.forgeElement = function forgeElement(tagName, properties, children) {
   var element = document.createElement(tagName);
-  for(var i in properties) {
-    element[i] = properties[i];
+  
+  for(var p in properties) {
+    element[p] = properties[p];
   }
+  
   if(children) {
     for(var i = 0, endi = children.length; i < endi; ++i) {
       element.appendChild(children[i]);
     }
   }
+  
   return element;
 }
-var fE = PanelUI.forgeElement;
+var fE = Hematite.forgeElement;
 
 /**
- * @module PanelUI.Sidebar inherits AsyNTer.Node
+ * @module Hematite.Sidebar inherits AsyNTer.Node
  * @description Makes a sidebar. Buttons added to the sidebar can be triggered by clicks or keyboard shortcuts 1-9, 0, -, and =
  * @description Icons come from Font Awesome and are specified in the faClass option
  * 
- * @example var sidebar = new PanelUI.Sidebar();
+ * @example var sidebar = new Hematite.Sidebar();
  * @example sidebar.addButton({buttonName: 'do_stuff', faClass: 'fa-question', title: 'Tooltip text'});
  * @example sidebar.on('do_stuff', function() {console.log('Doing stuff')});
  * @example sidebar.on('trigger', function(e) {console.log(e.buttonName === 'do_stuff')});
  */
-PanelUI.Sidebar = function Sidebar() {
+Hematite.Sidebar = function Sidebar() {
   AsyNTer.Node.call(this);
+  
+  var self = this;
   
   // @prop HTMLElement domElement -- div tag that holds all of the Panel's HTML elements
   this.domElement = fE('div', {id: 'sidebar', tabIndex: 1, accessKey: '1'});
@@ -54,47 +64,47 @@ PanelUI.Sidebar = function Sidebar() {
   // @method undefined addButton(Object {String faClass, String title, String buttonName}) -- Add a button. Support font-awesome icon names
   // @event trigger {String buttonName} -- Fired when a button is triggered
   // @event [buttonName] {} -- Fired when a button is triggered. Event name is the buttonName defined when the corresponding button was added
-  with(this) this.addButton = function(/*Object*/ options) {
+  this.addButton = function(options) {
     options = options || {};
     
     var element = fE('i', {
       className  : 'fa ' + 'button ' + (options.faClass || ''),
       textContent: options.char || '',
-      title      : (options.title || 'Not yet described') + '\n\nKey: ' + buttonIndicesToKeyChars[children.length],
+      title      : (options.title || 'Not yet described') + '\n\nKey: ' + self.buttonIndicesToKeyChars[self.children.length],
       tabIndex   : 0,
     });
     
-    element.addEventListener('click', function(/*Event*/ e) {
-      domElement.focus();
-      emit('trigger', {buttonName: options.buttonName});
-      emit(options.buttonName);
+    element.addEventListener('click', function() {
+      self.domElement.focus();
+      self.emit('trigger', {buttonName: options.buttonName});
+      self.emit(options.buttonName);
     });
     
-    domElement.appendChild(element);
+    self.domElement.appendChild(element);
   }
   
-  with(this) document.addEventListener('keydown', function(/*Event*/ e) {
+  document.addEventListener('keydown', function(e) {
     if(!e.altKey && !e.ctrlKey && !e.shiftKey && e.keyCode === 13 && e.target.classList.contains('button')) {
       e.target.dispatchEvent(new MouseEvent('click'));
     }
   });
   
-  with(this) document.addEventListener('keydown', function(/*Event*/ e) {
-    var index = keyCodesToButtonIndices[e.keyCode];
+  document.addEventListener('keydown', function(e) {
+    var index = self.keyCodesToButtonIndices[e.keyCode];
     
-    if(!e.altKey && !e.ctrlKey && !e.shiftKey && children[index]) {
-      children[index].dispatchEvent(new MouseEvent('click'));
+    if(!e.altKey && !e.ctrlKey && !e.shiftKey && self.children[index]) {
+      self.children[index].dispatchEvent(new MouseEvent('click'));
     }
   });
 }
-PanelUI.Sidebar.prototype = Object.create(AsyNTer.Node.prototype);
-PanelUI.Sidebar.prototype.constructor = PanelUI.Sidebar;
+Hematite.Sidebar.prototype = Object.create(AsyNTer.Node.prototype);
+Hematite.Sidebar.prototype.constructor = Hematite.Sidebar;
 
 /**
- * @module PanelUI.Panel inherits AsyNTer.Node
+ * @module Hematite.Panel inherits AsyNTer.Node
  * @description Makes a panel. Includes draggability and close button
  * 
- * @example var panel = new PanelUI.Panel({id: 'css_id', heading: 'Your heading here', closeButton: true, accessKey: 'a'});
+ * @example var panel = new Hematite.Panel({id: 'css_id', heading: 'Your heading here', closeButton: true, accessKey: 'a'});
  * @example panel.open();
  * 
  * @option String  accessKey   -- Browser accesskey
@@ -102,7 +112,7 @@ PanelUI.Sidebar.prototype.constructor = PanelUI.Sidebar;
  * @option String  heading     -- Heading text
  * @option String  id          -- CSS ID
  */
-PanelUI.Panel = function Panel(options) {
+Hematite.Panel = function Panel(options) {
   AsyNTer.Node.call(this);
   
   var self = this;
@@ -119,7 +129,7 @@ PanelUI.Panel = function Panel(options) {
   
   // @prop HTMLElement closeButton -- Reference to the close button (may not exist, depending on options)
   this.closeButton = null;
-  if(options.closeButton != false) {
+  if(Boolean(options.closeButton) !== false) {
     this.domElement.appendChild(
       this.closeButton = fE('i', {className: 'fa fa-close panel_close button', tabIndex: 0, title: 'Close panel\n\nKey: Q'})
     );
@@ -135,30 +145,30 @@ PanelUI.Panel = function Panel(options) {
     this.domElement.style.left = localStorage['dragger_' + this.domElement.id + '_left'];
   }
   
-  with(this) domElement.addEventListener('keydown', function(e) {
-    if(!e.altKey && !e.ctrlKey && !e.shiftKey && keyCuts[e.keyCode]) {
+  this.domElement.addEventListener('keydown', function(e) {
+    if(!e.altKey && !e.ctrlKey && !e.shiftKey && self.keyCuts[e.keyCode]) {
       e.stopPropagation();
       
-      keyCuts[e.keyCode].dispatchEvent(new MouseEvent('click'));
+      self.keyCuts[e.keyCode].dispatchEvent(new MouseEvent('click'));
     }
   });
   
-  if(options.closeButton != false) {
-    this.closeButton.addEventListener('click', function(/*Event*/ e) {
+  if(Boolean(options.closeButton) !== false) {
+    this.closeButton.addEventListener('click', function() {
       self.close();
     });
   }
   
-  with(this) draggie.on('dragEnd', function() {
-    localStorage['dragger_' + domElement.id + '_top' ] = domElement.style.top ;
-    localStorage['dragger_' + domElement.id + '_left'] = domElement.style.left;
+  this.draggie.on('dragEnd', function() {
+    localStorage['dragger_' + self.domElement.id + '_top' ] = self.domElement.style.top ;
+    localStorage['dragger_' + self.domElement.id + '_left'] = self.domElement.style.left;
   });
 }
-PanelUI.Panel.prototype = Object.create(AsyNTer.Node.prototype);
-PanelUI.Panel.prototype.constructor = PanelUI.Panel;
+Hematite.Panel.prototype = Object.create(AsyNTer.Node.prototype);
+Hematite.Panel.prototype.constructor = Hematite.Panel;
 
 // @method proto undefined open(Boolean focus) -- Adds Panel's domElement to the document. If focus is set, also focuses .domElement
-PanelUI.Panel.prototype.open = function(focus) {
+Hematite.Panel.prototype.open = function(focus) {
   document.body.appendChild(this.domElement);
   
   if(focus) {
@@ -168,19 +178,19 @@ PanelUI.Panel.prototype.open = function(focus) {
 
 // @method proto undefined close() -- Removes Panel's domElement from the document
 // @event close {} -- Fired on panel close
-PanelUI.Panel.prototype.close = function() {
+Hematite.Panel.prototype.close = function() {
   this.domElement.parentElement.removeChild(this.domElement);
   
   this.emit('close');
 }
 
 // @method proto Boolean isOpen() -- Returns whether panel is currently open (attached to document)
-PanelUI.Panel.prototype.isOpen = function() {
+Hematite.Panel.prototype.isOpen = function() {
   return this.domElement.parentElement === document.body;
 }
 
 // @method proto undefined toggleOpen(Boolean focus) -- Toggle .domElement on and off of document.body
-PanelUI.Panel.prototype.toggleOpen = function(focus) {
+Hematite.Panel.prototype.toggleOpen = function(focus) {
   if(this.isOpen()) {
     this.close();
   } else {
@@ -188,11 +198,7 @@ PanelUI.Panel.prototype.toggleOpen = function(focus) {
   }
 }
 
-},{"asynter":3,"draggabilly":4}],2:[function(require,module,exports){
-var PersistentWS = window.PersistentWS = require('persistent-ws');
-var PanelUI = window.PanelUI = require('./lib/PanelUI/PanelUI.js');
-
-},{"./lib/PanelUI/PanelUI.js":1,"persistent-ws":12}],3:[function(require,module,exports){
+},{"asynter":3,"draggabilly":4}],3:[function(require,module,exports){
 (function(root, factory) {
   if(typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
@@ -2402,6 +2408,8 @@ return Unidragger;
 }));
 
 },{"eventie":8,"unipointer":10}],12:[function(require,module,exports){
+arguments[4][3][0].apply(exports,arguments)
+},{"dup":3}],13:[function(require,module,exports){
 (function(root, factory) {
   if(typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
@@ -2547,4 +2555,4 @@ return Unidragger;
   return PersistentWS;
 })); // Module pattern
 
-},{}]},{},[2]);
+},{}]},{},[1]);

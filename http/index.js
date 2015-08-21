@@ -3,11 +3,11 @@
 ///////////////
 
 // Daisy-chainable HTMLElement maker
-var fE = PanelUI.forgeElement;
+var fE = Hematite.forgeElement;
 
 // Best JS inheritance
 var ProjectPanel = function(options) {
-  PanelUI.Panel.call(this, options);
+  Hematite.Panel.call(this, options);
   
   this.domElement.appendChild(
     fE('a', {href: options.href}, [
@@ -20,7 +20,7 @@ var ProjectPanel = function(options) {
   );
   
 }
-ProjectPanel.prototype = Object.create(PanelUI.Panel.prototype);
+ProjectPanel.prototype = Object.create(Hematite.Panel.prototype);
 ProjectPanel.prototype.constructor = ProjectPanel;
 
 // Shim for vendor-prefixed fullscreen API
@@ -42,7 +42,7 @@ if(document.fullscreenElement === undefined) {
 // Instances //
 ///////////////
 
-var sidebar = new PanelUI.Sidebar();
+var sidebar = new Hematite.Sidebar();
 sidebar.addButton({buttonName: 'land'    , faClass: 'fa-university', title: 'Landing page'       });
 sidebar.addButton({buttonName: 'help'    , faClass: 'fa-question'  , title: 'Help'               });
 sidebar.addButton({buttonName: 'fs'      , faClass: 'fa-arrows-alt', title: 'Fullscreen'         });
@@ -57,7 +57,7 @@ new ProjectPanel({
   text: 'Features a simple scene with a custom shader and touch + gamepad-friendly camera controls',
 }).open();
 
-var helpPanel = new PanelUI.Panel({id: 'help', heading: 'A Panel That Could Be Helpful'});
+var helpPanel = new Hematite.Panel({id: 'help', heading: 'A Panel That Could Be Helpful'});
 helpPanel.domElement.appendChild(fE('div', {textContent: 'But this is only a demo'}));
 
 var darkColors = document.getElementById('dark_colors');

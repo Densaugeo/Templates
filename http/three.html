@@ -6,10 +6,10 @@
 
 <title>Template - three.js</title>
 
-<link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
-<link rel="stylesheet" href="lib/PanelUI/PanelUI_light.css" id="light_colors">
-<link rel="stylesheet" href="lib/PanelUI/PanelUI_dark.css" id="dark_colors">
-<link rel="stylesheet" href="lib/PanelUI/PanelUI.css">
+<link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="node_modules/hematite/Hematite-light.css" id="light_colors">
+<link rel="stylesheet" href="node_modules/hematite/Hematite-dark.css" id="dark_colors">
+<link rel="stylesheet" href="node_modules/hematite/Hematite.css">
 
 <style type='text/css'>
 canvas {
@@ -43,9 +43,7 @@ if(top !== self) {
 }
 </script>
 
-<script type="text/javascript" src="lib/draggabilly.pkgd.min.js"></script>
-<script type="text/javascript" src="lib/EventEmitter.min.js"></script>
-<script type="text/javascript" src="lib/PanelUI/PanelUI.js"></script>
+<script type="text/javascript" src="/libs.pkgd.js"></script>
 
 <script type="text/javascript" src="lib/three.min.js"></script>
 <script type="text/javascript" src="lib/three.Densaugeo.js"></script>
@@ -61,7 +59,7 @@ if(top !== self) {
 ///////////////
 
 // Daisy-chainable HTMLElement maker
-var fE = PanelUI.forgeElement;
+var fE = Hematite.forgeElement;
 
 // Shim for vendor-prefixed fullscreen API
 if(HTMLElement.prototype.requestFullscreen == undefined) {
@@ -82,14 +80,14 @@ if(document.fullscreenElement === undefined) {
 // Instances //
 ///////////////
 
-var sidebar = new PanelUI.Sidebar();
+var sidebar = new Hematite.Sidebar();
 sidebar.addButton({buttonName: 'land'    , faClass: 'fa-university', title: 'Landing page'       });
 sidebar.addButton({buttonName: 'help'    , faClass: 'fa-question'  , title: 'Help'               });
 sidebar.addButton({buttonName: 'fs'      , faClass: 'fa-arrows-alt', title: 'Fullscreen'         });
 sidebar.addButton({buttonName: 'contrast', faClass: 'fa-adjust'    , title: 'Flip Contrast'      });
 sidebar.addButton({buttonName: 'clear'   , faClass: 'fa-recycle'   , title: 'Clear local storage'});
 
-var helpPanel = new PanelUI.Panel({id: 'help', heading: 'A Panel That Could Be Helpful'});
+var helpPanel = new Hematite.Panel({id: 'help', heading: 'A Panel That Could Be Helpful'});
 helpPanel.domElement.appendChild(fE('div', {textContent: 'Controls work with gamepads and touchscreens too - try wasdec, arrows, one- and two-finger touch, and touch and hold the right side of the screen while tilting.'}));
 
 var darkColors = document.getElementById('dark_colors');

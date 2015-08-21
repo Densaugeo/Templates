@@ -1,2 +1,3 @@
-var PersistentWS = window.PersistentWS = require('persistent-ws');
-var PanelUI = window.PanelUI = require('./lib/PanelUI/PanelUI.js');
+window.PersistentWS = require('persistent-ws');
+window.Hematite = require('hematite');
+window.EventEmitter = require('asynter').Node;
