@@ -1,15 +1,34 @@
 {
-  "name": "Template",
-  "description": "A template (surprise!)",
+  "name": "template",
   "version": "0.0.0",
-  "main": "server.js",
+  "description": "A template (surprise!)",
+  "keywords": [],
   "homepage": "https://github.com/Densaugeo/Templates",
+  "bugs": "https://github.com/Densaugeo/Templates/issues",
+  "license": "MIT",
+  "author": "Densaugeo (http://www.madengineersworkshop.net/)",
+  "contributors": [],
+  "files": [
+    "http",
+    "default_config.json",
+    "LICENSE",
+    "package.json",
+    "README.md",
+    "server.js"
+  ],
+  "main": "server.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Densaugeo/Templates.git"
   },
-  "license": "MIT",
-  "private": true,
+  "scripts": {
+    "install": "npm run install-font-awesome && npm run install-hematite",
+    "install-font-awesome": "npm install --prefix=http font-awesome",
+    "install-hematite": "npm install --prefix=http https://github.com/Densaugeo/Hematite",
+    "lint": "jshint *.js http/*.js",
+    "build-client": "browserify http/libs.js > http/libs.pkgd.js"
+  },
+  "config": {},
   "dependencies": {
     "good": "~6.3.0",
     "good-console": "~5.0.1",
@@ -18,8 +37,6 @@
     "moment": "~2.10.3",
     "ws": "~0.7.2"
   },
-  "author": "Densaugeo <a@b.c> (http://www.madengineersworkshop.net/)",
-  "bugs": "https://github.com/Densaugeo/Templates/issues",
   "devDependencies": {
     "browserify": "~11.0.0",
     "persistent-ws": "~0.0.7",
@@ -27,11 +44,5 @@
     "draggabilly": "~1.2.4",
     "jshint": "~2.8.0"
   },
-  "scripts": {
-    "install": "npm run install-font-awesome && npm run install-hematite",
-    "install-font-awesome": "npm install --prefix=http font-awesome",
-    "install-hematite": "npm install --prefix=http https://github.com/Densaugeo/Hematite",
-    "lint": "jshint *.js http/*.js",
-    "build-client": "browserify http/libs.js > http/libs.pkgd.js"
-  }
+  "engines": {}
 }
